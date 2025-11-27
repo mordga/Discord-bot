@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from discord import PermissionOverwrite, HTTPException, Forbidden
+from discord import PermissionOverwrite, HTTPException, Forbidden, TextChannel
 from typing import Optional
 
 
@@ -14,7 +14,11 @@ class Canales(commands.Cog):
         """Crea un embed estándar para los comandos del cog."""
         author = ctx.author
         e = discord.Embed(title=titulo, color=discord.Color.blurple())
-        e.add_field(name="Canal", value=f"{ctx.channel.mention}", inline=False)
+        channel = ctx.channel
+        if isinstance(channel, TextChannel):
+            e.add_field(name="Canal", value=f"{channel.mention}", inline=False)
+        else:
+            e.add_field(name="Canal", value=f"#{channel}", inline=False)
         if extra:
             e.add_field(name="Info", value=extra, inline=False)
 
@@ -40,12 +44,16 @@ class Canales(commands.Cog):
         if ctx.guild is None:
             return "❌ Este comando solo puede usarse dentro de un servidor."
 
+        channel = ctx.channel
+        if not isinstance(channel, TextChannel):
+            return "❌ Este comando solo funciona en canales de texto."
+
         try:
             everyone = ctx.guild.default_role
-            overwrite: PermissionOverwrite = ctx.channel.overwrites_for(everyone) or PermissionOverwrite()
+            overwrite: PermissionOverwrite = channel.overwrites_for(everyone) or PermissionOverwrite()
             for name, value in perm_changes.items():
                 setattr(overwrite, name, value)
-            await ctx.channel.set_permissions(everyone, overwrite=overwrite)
+            await channel.set_permissions(everyone, overwrite=overwrite)
             return None
         except Forbidden:
             return "❌ No tengo permisos para modificar los permisos del canal."
@@ -81,9 +89,13 @@ class Canales(commands.Cog):
         if ctx.guild is None:
             return await ctx.send("❌ Este comando solo puede usarse dentro de un servidor.")
 
+        channel = ctx.channel
+        if not isinstance(channel, TextChannel):
+            return await ctx.send("❌ Este comando solo funciona en canales de texto.")
+
         if tiempo.lower() in {"off", "0"}:
             try:
-                await ctx.channel.edit(slowmode_delay=0)
+                await channel.edit(slowmode_delay=0)
             except Forbidden:
                 return await ctx.send("❌ No tengo permisos para editar el canal.")
             except HTTPException as e:
@@ -100,7 +112,7 @@ class Canales(commands.Cog):
             return await ctx.send("❌ El slowmode máximo permitido es 21600 segundos (6 horas).")
 
         try:
-            await ctx.channel.edit(slowmode_delay=segundos)
+            await channel.edit(slowmode_delay=segundos)
         except Forbidden:
             return await ctx.send("❌ No tengo permisos para editar el canal.")
         except HTTPException as e:
