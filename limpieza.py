@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from discord import Forbidden, HTTPException, TextChannel
-from typing import Optional
 
 
 class Limpieza(commands.Cog):
