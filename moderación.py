@@ -30,7 +30,7 @@ def _parse_time(s: str) -> Optional[int]:
                 return None
             total += int(num) * multipliers[ch]
             num = ''
-        elif ch in [' ', ',']:
+        elif ch in ' ,':
             continue
         else:
             return None
@@ -60,7 +60,7 @@ class Moderacion(commands.Cog):
         Returns:
             Embed creado
         """
-        e = discord.Embed(title=f"{action}", color=discord.Color.red(), timestamp=discord.utils.utcnow())
+        e = discord.Embed(title=action, color=discord.Color.red(), timestamp=discord.utils.utcnow())
         e.add_field(name="Usuario", value=f"{miembro} (`{getattr(miembro, 'id', str(miembro))}`)", inline=False)
         e.add_field(name="Moderador", value=f"{moderador} (`{moderador.id}`)", inline=False)
         if razon:
@@ -237,7 +237,7 @@ class Moderacion(commands.Cog):
         
         Args:
             ctx: Contexto del comando
-            miembro: Miembro a desmuetear
+            miembro: Miembro a desmutear
         """
         try:
             await miembro.edit(mute=False)
